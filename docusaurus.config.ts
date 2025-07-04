@@ -11,11 +11,14 @@ const config: Config = {
     v4: true,
   },
 
-  url: "https://your-site.com",
-  baseUrl: "/",
+  url: "https://valenceworks.github.io/", // ✅ trailing slash
+  baseUrl: "/flickz-docs/",               // ✅ trailing slash
 
-  organizationName: "flickz",
-  projectName: "flickz-docs",
+  trailingSlash: true,                    // ✅ ensures consistent URLs for GitHub Pages
+
+  organizationName: "ValenceWorks",       // ✅ GitHub org
+  projectName: "flickz-docs",             // ✅ GitHub repo
+
 
   onBrokenLinks: "throw",
   onBrokenMarkdownLinks: "warn",
