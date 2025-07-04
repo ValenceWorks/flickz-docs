@@ -1,0 +1,49 @@
+name: Fetch OpenAPI Bundle and Deploy Docs
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  sync-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout docs repo
+        uses: actions/checkout@v4
+
+      - name: Checkout backend repo
+        uses: actions/checkout@v4
+        with:
+          repository: ValenceWorks/flickz-backend
+          token: ${{ secrets.BACKEND_PAT }}  # <-- MUST be set in repo/org secrets
+          ref: main
+          path: backend
+
+      - name: Compare and copy bundle if changed
+        run: |
+          mkdir -p static
+          if ! diff backend/openapi-build/openapi.yaml static/openapi-bundle.yaml > /dev/null; then
+            echo "OpenAPI bundle changed. Copying..."
+            cp backend/openapi-build/openapi.yaml static/openapi-bundle.yaml
+          else
+            echo "No changes to OpenAPI bundle."
+          fi
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies and build site
+        run: |
+          npm ci
+          npm run build
+
+      - name: Deploy to GitHub Pages
+        run: npm run deploy
+        env:
+          GIT_USER: github-actions
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
