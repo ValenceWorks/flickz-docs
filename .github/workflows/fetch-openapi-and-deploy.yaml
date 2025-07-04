@@ -24,9 +24,9 @@ jobs:
       - name: Compare and copy bundle if changed
         run: |
           mkdir -p static
-          if ! diff openapi-build/openapi.yaml static/openapi-bundle.yaml > /dev/null; then
+          if ! diff openapi-build/openapi-bundle.yaml static/openapi-bundle.yaml > /dev/null; then
             echo "OpenAPI bundle changed. Copying..."
-            cp openapi-build/openapi.yaml static/openapi-bundle.yaml
+            cp openapi-build/openapi-bundle.yaml static/openapi-bundle.yaml
           else
             echo "No changes to OpenAPI bundle."
           fi
