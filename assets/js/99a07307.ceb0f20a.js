@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkflickz_docs=self.webpackChunkflickz_docs||[]).push([[3487],{46070:s=>{s.exports=JSON.parse('{"name":"docusaurus-plugin-redoc","id":"flickz-api"}')}}]);

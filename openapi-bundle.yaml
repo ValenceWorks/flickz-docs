@@ -1,0 +1,1076 @@
+openapi: 3.0.4
+info:
+  title: Flickz API
+  version: v1
+  description: |
+    Flickz is a platform that connects event photographers with clients. It allows photographers to create profiles, upload event galleries,  and sell high-resolution images. Users can browse events, purchase media,  and book photographers for future gigs. This API powers both the  frontend and backend operations of Flickz, including authentication,  media management, and payment processing.
+    This specification is intended for developers working on the Flickz  platform, including frontend engineers, backend contributors, and  third-party integrators.
+  license:
+    name: Private License
+    url: https://github.com/valenceworks/license/private/api.md
+servers:
+  - url: http://localhost:3000/api/v1
+    description: Local development server
+security:
+  - {}
+tags:
+  - name: auth
+    x-displayName: Auth
+    description: |
+      Endpoints related to user authentication and account management,  including signup, login, password resets, session revocation,  and email verification.
+paths:
+  /auth/signup:
+    post:
+      tags:
+        - auth
+      summary: Create a user account
+      description: Create a user by providing email and password.
+      operationId: signup
+      requestBody:
+        description: Send the user email and password
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  minLength: 8
+            examples:
+              default:
+                value:
+                  email: foo@gmail.com
+                  password: your_password_here
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - message
+                  - data
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: successfully created user account
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        description: a unqine id assigned the user
+                        example: a45ege4r45re-grtghtrgrtg-tgrtggtrg
+                      handle:
+                        type: string
+                        description: The user unqine handle
+                        example: warmachinerocks123
+                      name:
+                        type: string
+                        nullable: true
+                        description: the user full name
+                        example: null,
+                      photographerProfile:
+                        type: object
+                        nullable: true
+                        example: null
+                        properties:
+                          id:
+                            type: string
+                            description: uuid of the photographerProfile unqiue to the photographer
+                          userId:
+                            type: string
+                            description: uuid of the User that this profile belongs to
+                          bio:
+                            type: string
+                            nullable: true
+                          experienceYears:
+                            type: number
+                            nullable: true
+                          responseTime:
+                            type: number
+                            description: in hours
+                            nullable: true
+                          availability:
+                            type: string
+                            nullable: true
+                            description: when the photographer is availability
+                          equipments:
+                            type: array
+                            items:
+                              type: string
+                          createdAt:
+                            type: string
+                          updatedAt:
+                            type: string
+                      avatar:
+                        type: string
+                        nullable: true
+                        description: The fileKey for the user avatar, use this to fetch the user avatar
+                        example: null
+                      bio:
+                        type: string
+                        nullable: true
+                        description: The User bio
+                        example: null
+                      userType:
+                        type: string
+                        enum:
+                          - USER
+                          - PHOTOGRAPHER
+                          - ADMIN
+                      createdAt:
+                        type: string
+                      updatedAt:
+                        type: string
+        '400':
+          description: invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/badRequest'
+  /auth/login:
+    post:
+      summary: Login a user
+      operationId: login
+      tags:
+        - auth
+      requestBody:
+        required: true
+        description: credentials
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - message
+                  - accessToken
+                  - data
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: successfully created user account
+                  accessToken:
+                    type: string
+                  tokenType:
+                    type: string
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        description: a unqine id assigned the user
+                        example: a45ege4r45re-grtghtrgrtg-tgrtggtrg
+                      handle:
+                        type: string
+                        description: The user unqine handle
+                        example: warmachinerocks123
+                      name:
+                        type: string
+                        nullable: true
+                        description: the user full name
+                        example: null,
+                      photographerProfile:
+                        type: object
+                        nullable: true
+                        example: null
+                        properties:
+                          id:
+                            type: string
+                            description: uuid of the photographerProfile unqiue to the photographer
+                          userId:
+                            type: string
+                            description: uuid of the User that this profile belongs to
+                          bio:
+                            type: string
+                            nullable: true
+                          experienceYears:
+                            type: number
+                            nullable: true
+                          responseTime:
+                            type: number
+                            description: in hours
+                            nullable: true
+                          availability:
+                            type: string
+                            nullable: true
+                            description: when the photographer is availability
+                          equipments:
+                            type: array
+                            items:
+                              type: string
+                          createdAt:
+                            type: string
+                          updatedAt:
+                            type: string
+                      avatar:
+                        type: string
+                        nullable: true
+                        description: The fileKey for the user avatar, use this to fetch the user avatar
+                        example: null
+                      bio:
+                        type: string
+                        nullable: true
+                        description: The User bio
+                        example: null
+                      userType:
+                        type: string
+                        enum:
+                          - USER
+                          - PHOTOGRAPHER
+                          - ADMIN
+                      createdAt:
+                        type: string
+                      updatedAt:
+                        type: string
+        '400':
+          description: invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/badRequest'
+  /auth/revoke-session:
+    post:
+      summary: Revoke session
+      operationId: revokeSession
+      description: |
+        Revoke an active session token. This endpoint is primarily used to log out a user  by marking their session token as invalid. Send the current authenticated user's  token in the request body to terminate the session.
+        Once revoked, the token will no longer be accepted for authenticated requests.
+      tags:
+        - auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - token
+              properties:
+                token:
+                  type: string
+                  description: The session token to be revoked.
+              example:
+                token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+      responses:
+        '200':
+          description: Session token was successfully revoked.
+          x-summary: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - message
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Token revoked successfully.
+        '404':
+          description: The provided token was not found or already revoked.
+          x-summary: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - message
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Token not found or already invalidated.
+  /auth/request-password-reset:
+    post:
+      summary: Request a password reset code
+      operationId: requestPasswordReset
+      description: Sends a password reset code as a query parameter to the user's email, along with a frontend reset link. The code expires after 8 minutes.
+      tags:
+        - auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: The email address of the user requesting a password reset.
+      responses:
+        '200':
+          description: Password reset code sent successfully.
+          x-summary: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - message
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Password reset email sent.
+        '400':
+          description: Invalid request body or user does not exist.
+          x-summary: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/badRequest'
+  /auth/reset-password:
+    post:
+      summary: Reset password
+      operationId: resetPassword
+      description: Reset a user's password by providing a valid reset code.
+      tags:
+        - auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - code
+              properties:
+                code:
+                  type: string
+                  description: |
+                    The reset code sent via email with a frontend link.  Must be submitted within 8 minutes.
+                newPassword:
+                  type: string
+                  description: the new user password
+                  minLength: 8
+      responses:
+        '200':
+          description: Password has been successfully reset.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - message
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Password reset successfully.
+        '400':
+          description: Invalid request — the reset code is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/badRequest'
+  /auth/request-email-verification:
+    post:
+      summary: Request email verification
+      operationId: requestEmailVerification
+      description: Sends a email verification code as a query param atteched to the frontend url
+      tags:
+        - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              description: The request playload
+              required:
+                - email
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: the email your requesting to /auth/verify-email
+      responses:
+        '200':
+          description: success
+          x-summary: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+        '400':
+          description: success
+          x-summary: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/badRequest'
+  /auth/verify-email:
+    post:
+      summary: Verify email
+      operationId: verifyEmail
+      description: Verify a user's email address using the verification code sent via email.
+      tags:
+        - auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - code
+              properties:
+                code:
+                  type: string
+                  description: The email verification code sent to the user.
+      responses:
+        '200':
+          description: Email successfully verified.
+          x-summary: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - message
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Email verified successfully.
+        '400':
+          description: Invalid request body or verification code.
+          x-summary: Invalid Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/badRequest'
+  /users:
+    get:
+      summary: Get a list of users
+      description: Retrieve a list of users with pagination and optional filtering.
+      operationId: getUsers
+      tags:
+        - users
+      parameters:
+        - name: page
+          in: query
+          required: false
+          description: The page number for pagination (default is 1).
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          required: false
+          description: The number of users to return per page (default is 10, max is 100).
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: A list of users was successfully retrieved.
+          x-summary: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - data
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Users retrieved successfully.
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/public-user'
+                  pagination:
+                    $ref: '#/components/schemas/pagination'
+        '400':
+          description: Bad request due to invalid parameters.
+          x-summary: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/badRequest'
+  /users/{userId}:
+    get:
+      summary: Get a user by ID
+      x-summary: Get User by ID
+      description: Get a user by their unique identifier.
+      operationId: getUserById
+      tags:
+        - users
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: The unique identifier of the user to retrieve.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: User was successfully retrieved.
+          x-summary: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/public-user'
+        '404':
+          description: User not found.
+          x-summary: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+  /users/handle/{handle}:
+    get:
+      summary: Get a user by handle
+      description: Retrieve a public user profile by their unique handle.
+      operationId: getUserByHandle
+      tags:
+        - users
+      parameters:
+        - name: handle
+          in: path
+          required: true
+          description: The unique handle (username) of the user to retrieve.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The user was successfully retrieved.
+          x-summary: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/public-user'
+        '404':
+          description: No user was found with the provided handle.
+          x-summary: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+  /users/handle/available/{handle}:
+    get:
+      summary: Check handle availability
+      description: Verify whether a user handle (username) is available for registration.
+      operationId: checkHandleAvailability
+      tags:
+        - users
+      parameters:
+        - name: handle
+          in: path
+          required: true
+          description: The handle (username) to check for availability.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The handle availability was successfully checked.
+          x-summary: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: Whether the request was processed successfully.
+                    example: true
+                  message:
+                    type: string
+                    description: A message describing the result.
+                    example: Handle is available.
+                  data:
+                    type: object
+                    properties:
+                      available:
+                        type: boolean
+                        description: Whether the handle is available for use.
+                        example: true
+                      handle:
+                        type: string
+                        description: The handle that was checked.
+                        example: janeshoots
+        '400':
+          description: The handle parameter is missing or invalid.
+          x-summary: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+  /users/me:
+    get:
+      summary: Get Current User
+      description: Retrieve the profile of the currently authenticated user.
+      operationId: getCurrentUser
+      tags:
+        - users
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: The current user's profile was successfully retrieved.
+          x-summary: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: Whether the request was successful.
+                    example: true
+                  message:
+                    type: string
+                    description: Response message.
+                    example: User profile retrieved successfully.
+                  data:
+                    $ref: '#/components/schemas/private-user'
+        '401':
+          description: Unauthorized access. The user is not authenticated or token is missing/invalid.
+          x-summary: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+    patch:
+      summary: Update Current User
+      description: Update the profile of the currently authenticated user.
+      operationId: updateCurrentUser
+      tags:
+        - users
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/update-user'
+      responses:
+        '200':
+          description: The current user's profile was successfully updated.
+          x-summary: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: Whether the request was successful.
+                    example: true
+                  message:
+                    type: string
+                    description: Response message.
+                    example: User profile updated successfully.
+                  data:
+                    $ref: '#/components/schemas/private-user'
+        '400':
+          description: Bad request due to invalid input data.
+          x-summary: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/badRequest'
+        '401':
+          description: Unauthorized access. The user is not authenticated or token is missing/invalid.
+          x-summary: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+  /users/me/avatar:
+    post:
+      summary: Update user avatar
+      description: Upload and update the current authenticated user's avatar image.
+      operationId: updateUserAvatar
+      tags:
+        - users
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                avatar:
+                  type: string
+                  format: binary
+                  description: |
+                    Avatar image file to upload. Accepts JPEG, PNG, or WebP formats. Max size: 10MB.
+                  maxLength: 10485760
+      responses:
+        '200':
+          description: The user's avatar was successfully updated.
+          x-summary: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: Whether the request was successful.
+                    example: true
+                  message:
+                    type: string
+                    description: Response message.
+                    example: User avatar updated successfully.
+        '400':
+          description: Invalid request body or unsupported file type.
+          x-summary: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/badRequest'
+        '401':
+          description: Unauthorized access. Authentication is required.
+          x-summary: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    badRequest:
+      type: object
+      required:
+        - success
+        - message
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: Invalid input
+        validationErrors:
+          type: array
+          nullable: true
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              message:
+                type: string
+    photographer-profile:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the photographer profile.
+          example: profile_123
+        userId:
+          type: string
+          description: ID of the user that owns this photographer profile.
+          example: user_456
+        locationLabel:
+          type: string
+          nullable: true
+          description: Human-readable location label (e.g. "New York, NY").
+          example: Los Angeles, CA
+        bio:
+          type: string
+          nullable: true
+          description: A short bio or description about the photographer.
+          example: Specializing in weddings and portraits.
+        portfolioUrl:
+          type: string
+          format: uri
+          nullable: true
+          description: URL to the photographer's online portfolio.
+          example: https://myportfolio.com
+        websiteUrl:
+          type: string
+          format: uri
+          nullable: true
+          description: Personal or business website URL.
+          example: https://janedoephoto.com
+        phoneNumber:
+          type: string
+          nullable: true
+          description: Contact phone number.
+          example: +1-555-123-4567
+        responseTime:
+          type: number
+          nullable: true
+          description: Estimated response time in hours.
+          example: 2.5
+        availability:
+          type: string
+          nullable: true
+          description: Availability information (free text).
+          example: Weekdays after 4PM, weekends anytime
+        experienceYears:
+          type: integer
+          nullable: true
+          description: Number of years of photography experience.
+          example: 5
+        equipments:
+          type: array
+          items:
+            type: string
+          description: List of equipment owned or used by the photographer.
+          example:
+            - Canon R5
+            - 85mm f/1.4
+            - Lighting Kit
+        createdAt:
+          type: string
+          format: date-time
+          description: ISO timestamp for when the profile was created.
+          example: '2024-05-01T12:34:56Z'
+        updatedAt:
+          type: string
+          format: date-time
+          description: ISO timestamp for the last profile update.
+          example: '2024-06-01T08:00:00Z'
+      required:
+        - id
+        - userId
+        - equipments
+        - createdAt
+        - updatedAt
+      x-summary: Photographer Profile
+    public-user:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the user.
+          example: '12345'
+        name:
+          type: string
+          nullable: true
+          description: The user's display name.
+          example: Jane Doe
+        bio:
+          type: string
+          nullable: true
+          description: A short biography or description of the user.
+          example: Event photographer based in NYC.
+        avatar:
+          type: string
+          nullable: true
+          format: uri
+          description: URL to the user's avatar image.
+          example: https://example.com/avatar.jpg
+        userType:
+          type: string
+          enum:
+            - ADMIN
+            - USER
+            - PHOTOGRAPHER
+          description: The role or type of user.
+          example: PHOTOGRAPHER
+        handle:
+          type: string
+          description: The unique handle or username.
+          example: janeshoots
+        photographerProfile:
+          allOf:
+            - $ref: '#/components/schemas/photographer-profile'
+          nullable: true
+          type: object
+          description: Publicly available photographer profile if the user is a photographer.
+      required:
+        - id
+        - userType
+        - handle
+    pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+          example: 1
+          description: The current page number being returned.
+          x-summary: Current page number
+        limit:
+          type: integer
+          example: 20
+          description: The number of items requested per page (client-defined).
+          x-summary: Requested items per page
+        pageSize:
+          type: integer
+          example: 20
+          description: The actual number of items returned on this page.
+          x-summary: Actual items returned
+        totalPages:
+          type: integer
+          example: 5
+          description: The total number of pages available based on the item count and limit.
+          x-summary: Total number of pages
+        total:
+          type: integer
+          example: 100
+          description: The total number of items across all pages.
+          x-summary: Total item count
+      required:
+        - page
+        - limit
+        - pageSize
+        - totalPages
+        - total
+    error:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: An error occurred.
+    private-user:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the user.
+          example: user_123
+        name:
+          type: string
+          nullable: true
+          description: Display name of the user.
+          example: Jane Doe
+        email:
+          type: string
+          format: email
+          description: Email address of the user.
+          example: jane@example.com
+        bio:
+          type: string
+          nullable: true
+          description: A short biography of the user.
+          example: Portrait and event photographer based in LA.
+        avatar:
+          type: string
+          format: uri
+          nullable: true
+          description: URL to the user's avatar image.
+          example: https://example.com/avatar.jpg
+        userType:
+          type: string
+          enum:
+            - ADMIN
+            - USER
+            - PHOTOGRAPHER
+          description: The role or type of user.
+          example: PHOTOGRAPHER
+        handle:
+          type: string
+          description: Unique username or handle.
+          example: janeshoots
+        isEmailVerified:
+          type: boolean
+          description: Indicates whether the user's email has been verified.
+          example: true
+        photographerProfile:
+          $ref: '#/components/schemas/photographer-profile'
+          nullable: true
+          description: Photographer-specific profile data.
+      required:
+        - id
+        - email
+        - userType
+        - handle
+        - isEmailVerified
+    update-user:
+      type: object
+      description: Fields that can be updated on the current user's profile.
+      properties:
+        name:
+          type: string
+          maxLength: 100
+          nullable: true
+          description: Optional name of the user (max 100 characters).
+          example: Jane Doe
+        bio:
+          type: string
+          maxLength: 1000
+          nullable: true
+          description: Optional biography of the user (max 1000 characters).
+          example: Photographer based in LA, specializing in weddings.
+        userType:
+          type: string
+          enum:
+            - USER
+            - PHOTOGRAPHER
+          description: The role or type of user. Must be either USER or PHOTOGRAPHER.
+          nullable: true
+          example: PHOTOGRAPHER
+        handle:
+          type: string
+          minLength: 3
+          nullable: true
+          maxLength: 30
+          pattern: ^[a-zA-Z0-9_]+$
+          description: Unique handle (username), 3–30 characters. Only letters, numbers, and underscores are allowed.
+          example: jane_doe
+      additionalProperties: false
