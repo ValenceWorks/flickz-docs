@@ -13,40 +13,51 @@ jobs:
     steps:
       - name: Checkout docs repo
         uses: actions/checkout@v4
-        with:
-          # Checkout docs repo into root (default)
-          fetch-depth: 0
 
       - name: Checkout backend repo
         uses: actions/checkout@v4
         with:
           repository: ValenceWorks/flickz-backend
-          token: ${{ secrets.BACKEND_PAT }}
+          token: ${{ secrets.BACKEND_PAT }}  # <-- Set in org/repo secrets
           ref: main
-          path: backend  # Important! Checkout backend into "backend" folder
+          path: backend
 
-      - name: Compare and copy bundle if changed
+      - name: Check if OpenAPI bundle changed
+        id: check_diff
         run: |
           mkdir -p static
           if ! diff backend/openapi-build/openapi-bundle.yaml static/openapi-bundle.yaml > /dev/null; then
-            echo "OpenAPI bundle changed. Copying..."
+            echo "changed=true" >> $GITHUB_OUTPUT
             cp backend/openapi-build/openapi-bundle.yaml static/openapi-bundle.yaml
           else
-            echo "No changes to OpenAPI bundle."
+            echo "changed=false" >> $GITHUB_OUTPUT
           fi
 
       - name: Setup Node.js
+        if: steps.check_diff.outputs.changed == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: 22
 
-      - name: Install dependencies and build docs site
+      - name: Install dependencies and build site
+        if: steps.check_diff.outputs.changed == 'true'
         run: |
           npm ci
           npm run build
 
+      - name: Configure Git user
+        if: steps.check_diff.outputs.changed == 'true'
+        run: |
+          git config --global user.email "github-actions@github.com"
+          git config --global user.name "GitHub Actions"
+
       - name: Deploy to GitHub Pages
+        if: steps.check_diff.outputs.changed == 'true'
         run: npm run deploy
         env:
           GIT_USER: github-actions
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Skip deploy
+        if: steps.check_diff.outputs.changed == 'false'
+        run: echo "No changes detected in OpenAPI bundle, skipping build and deploy."
