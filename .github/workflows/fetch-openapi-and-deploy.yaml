@@ -13,20 +13,24 @@ jobs:
     steps:
       - name: Checkout docs repo
         uses: actions/checkout@v4
+        with:
+          # Checkout docs repo into root (default)
+          fetch-depth: 0
 
       - name: Checkout backend repo
         uses: actions/checkout@v4
         with:
           repository: ValenceWorks/flickz-backend
-          token: ${{ secrets.BACKEND_PAT }}  # <-- Set in org/repo secrets
+          token: ${{ secrets.BACKEND_PAT }}
           ref: main
+          path: backend  # Important! Checkout backend into "backend" folder
 
       - name: Compare and copy bundle if changed
         run: |
           mkdir -p static
-          if ! diff openapi-build/openapi-bundle.yaml static/openapi-bundle.yaml > /dev/null; then
+          if ! diff backend/openapi-build/openapi-bundle.yaml static/openapi-bundle.yaml > /dev/null; then
             echo "OpenAPI bundle changed. Copying..."
-            cp openapi-build/openapi-bundle.yaml static/openapi-bundle.yaml
+            cp backend/openapi-build/openapi-bundle.yaml static/openapi-bundle.yaml
           else
             echo "No changes to OpenAPI bundle."
           fi
@@ -36,7 +40,7 @@ jobs:
         with:
           node-version: 22
 
-      - name: Install dependencies and build site
+      - name: Install dependencies and build docs site
         run: |
           npm ci
           npm run build
