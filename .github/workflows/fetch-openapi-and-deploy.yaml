@@ -18,16 +18,15 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: ValenceWorks/flickz-backend
-          token: ${{ secrets.BACKEND_PAT }}  # <-- MUST be set in repo/org secrets
+          token: ${{ secrets.BACKEND_PAT }}  # <-- Set in org/repo secrets
           ref: main
-          path: backend
 
       - name: Compare and copy bundle if changed
         run: |
           mkdir -p static
-          if ! diff backend/openapi-build/openapi.yaml static/openapi-bundle.yaml > /dev/null; then
+          if ! diff openapi-build/openapi.yaml static/openapi-bundle.yaml > /dev/null; then
             echo "OpenAPI bundle changed. Copying..."
-            cp backend/openapi-build/openapi.yaml static/openapi-bundle.yaml
+            cp openapi-build/openapi.yaml static/openapi-bundle.yaml
           else
             echo "No changes to OpenAPI bundle."
           fi
