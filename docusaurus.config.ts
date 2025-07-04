@@ -61,6 +61,12 @@ const config: Config = {
   ],
 
   themeConfig: {
+      colorMode: {
+      defaultMode: "dark",   // set default theme to dark
+      disableSwitch: false,  // allow users to toggle the theme if you want
+      respectPrefersColorScheme: false,
+    },
+
     navbar: {
       title: "Flickz",
       items: [
@@ -72,11 +78,17 @@ const config: Config = {
         },
         { to: "/api/flickz", label: "API", position: "left" },
         {
-          href: "https://github.com/your-org/flickz",
+          href: "https://github.com/ValenceWorks/",
           label: "GitHub",
           position: "right",
         },
       ],
+    },
+
+    footer: {
+      style: "dark",
+      links: [],   // empty links
+      copyright: `© ${new Date().getFullYear()} blackbird. All rights reserved.`,
     },
   },
 };
